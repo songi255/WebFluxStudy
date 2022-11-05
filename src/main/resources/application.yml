@@ -1,0 +1,5 @@
+# Boot 2.7.5 부터 mongoDB 관련 설정도 적어줘야 한다고 한다... project에 쓰인 버전과 동일하게 작성하면 된다.
+spring:
+  mongodb:
+    embedded:
+      version: 3.4.11

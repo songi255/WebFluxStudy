@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hacking woth Spring Boot - Getting Started</title>
+</head>
+<body>
+    <!-- Thymeleaf 템플릿 라이브러리는 reactive stream을 완벽하게 지원한다. 또한 HTML과 100% 호환된다. -->
+    <h1>Welcome to Hacking with Spring Boot!</h1>
+
+    <p>
+        Over the span of this book, you'll build different parts of an e-commerce system
+        which will include fleshing out this web template with dynamic content, using the
+        power of "Spring Boot".
+    </p>
+    <!-- thymeleaf 는 DOM 기반 parser를 내장한다. 그래서 모든 태그는 닫혀있어야 한다. <img> 같이 쓸 수 있지만, <img/> 같이 꼭 닫아줘야 한다. -->
+
+    <h2>Inventory Management</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="item : ${items}">
+                <td th:text="${item.id}"></td>
+                <td th:text="${item.name}"></td>
+                <td th:text="${item.price}"></td>
+                <td>
+                    <form method="post" th:action="@{'/add/' + ${item.id}}">
+                       <input type="submit" value="Add to Cart"/>
+                    </form>
+                </td>
+                <td>
+                    <!-- HTML의 form 은 get 과 post 만 지원하지만, thymeleaf 에서는 th:method 로 delete 요청을 간단히 보낼 수 있다. -->
+                    <!-- 실제 랜더링은 <input type="hidden" name="_method" value="delete" /> 로 변환되어 post 요청으로 전송한다. -->
+                    <!-- post 요청인데 어떻게 delete 될까? Spring WebFlux 에 @DeleteMapping 으로 요청을 전달하는 특수 필터가 있기 때문이다. -->
+                    <!-- 기본적으로 활성화되어있지는 않고, application.properties 에서 설정해주면 된다. -->
+                    <form th:method="delete" th:action="@{'/delete' + ${item.id}}">
+                        <input type="submit" value="Delete" />
+                    </form>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>My Cart</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Quantity</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="cartItem : ${cart.cartItems}">
+                <td th:text="${cartItem.item.id}"></td>
+                <td th:text="${cartItem.item.name}"></td>
+                <td th:text="${cartItem.quantity}"></td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>

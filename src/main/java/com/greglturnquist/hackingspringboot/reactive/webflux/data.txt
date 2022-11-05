@@ -1,0 +1,20 @@
+우선 한번 더 상기. reactive programming 에서는 모든 과정이 reactive 여야 한다.
+하나라도 blocking code가 있다면, 전체 서비스는 무너진다.
+
+reactive가 태생적으로 빠르다는 주장은 선입견인데, 사실 대규모작업이 아니면 오버헤드로 인한 성능저하가 발생한다. 즉.. 대용량에 특화되어있다.
+
+DB도 예외는 아니다. 물론 데코레이팅할 수 있지만, 리액티브의 장점을 잃게 된다.
+그렇다면 어떤 DB가 최신 reactive 패러다임을 지원하고 있을까?
+    - MongoDB
+    - Redis (Lettuce driver 사용시)
+    - Apache Cassandra
+    - Elasticsearch
+    - Neo4j
+    - Couchbase
+
+기존 RDB 관련.. JDBC, JPA, Jdbi, jOOQ 등등... 하나도 포함되어있지 않다. 무슨 문제일까? 내부 스레드풀을 사용하기 때문이다.
+지난 20년간 산업현장에서 배운 최고의 교훈은 장비코어 수 보다 많은 스레드 사용은 장점이 거의 없다는 것이다.
+스레드풀은 일반적으로 포화상태에 도달하기 때문에, 스레드풀 자체도 결국 블로킹된다.
+    - R2DBC (Reactive RDBC) 라고, reactive stream과 RDBC를 연결하도록 설계된 명세가 있다. 하지만.. 22년 11월 현재도 완성되지 않은 것 같다.
+    - twitter에서 @r2dbc 팔로우 하여 진행상황을 지켜보는 것은 의미가 있을 것이다.
+

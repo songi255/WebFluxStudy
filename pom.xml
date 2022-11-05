@@ -47,6 +47,29 @@
             <artifactId>reactor-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- 전통적인 블로킹 방식은 spring-boot-starter-data-mongodb. 아래 4가지 의존관계를 포함한다.
+            1. spring-boot-starter
+            2. spring-data-mongodb : blocking 방식 driver 제외된 spring mongodb
+            3. mongodb-driver-reactivestreams : mongodb 공식 reactive stream driver
+            4. reactor-core : project reactor core module
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-mongodb-reactive</artifactId>
+        </dependency>
+
+        <!-- 내장형 mongodb 도구. test 에 주로 사용하며 application 초기 설계 단계에서 data store 로 사용할 수 있다. -->
+        <dependency>
+            <groupId>de.flapdoodle.embed</groupId>
+            <artifactId>de.flapdoodle.embed.mongo</artifactId>
+        </dependency>
+
+        <!-- reactive가 아닌 전통적 mongodb driver. -->
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongodb-driver-sync</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>
