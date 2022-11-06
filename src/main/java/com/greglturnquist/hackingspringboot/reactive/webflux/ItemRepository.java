@@ -2,12 +2,13 @@ package com.greglturnquist.hackingspringboot.reactive.webflux;
 
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.mongodb.core.ReactiveFluentMongoOperations;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.repository.query.ReactiveQueryByExampleExecutor;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import reactor.core.publisher.Flux;
 
-public interface ItemRepository extends ReactiveCrudRepository<Item, String>, ReactiveQueryByExampleExecutor<Item> {
+public interface ItemRepository extends ReactiveCrudRepository<Item, String>, ReactiveQueryByExampleExecutor<Item>, ReactiveFluentMongoOperations {
     /* 업계에서는 NoSQL data store를 표준화하는 방법을 찾기위해 다양한 시도를 했지만, 아직 성공사례가 없다.
         이유는 모든 NoSQL 엔진이 각기 다르고, 저마다 특징과 장단점, 상충되는 부분이 존재하기 때문이다. 성급한 일반화는 고유한 특성을 잃어 실패하게 된다.
 
@@ -76,9 +77,8 @@ public interface ItemRepository extends ReactiveCrudRepository<Item, String>, Re
     // .. 끝이다. 이후 Service에서 Example 객체를 사용하여 query 한다. inventoryService 에 적어놓겠다.
 
 
-
-
-
+    // 머.. 이렇게 fluent 연산까지.. 다양한 쿼리방법을 알아봤다. 각각은 장단이 있으니, 실제 프로젝트 상황에 맞게 올바른 선택을 하자.
+    // 참고로 마이그레이션은 쉽지 않은 작업이기 때문에, 사전에 어떤 data store 를 사용할 지 면밀히 분석해서 결정해야 한다. 도메인 객체 정의에도 큰 영향을 미치므로..
 
 
 
