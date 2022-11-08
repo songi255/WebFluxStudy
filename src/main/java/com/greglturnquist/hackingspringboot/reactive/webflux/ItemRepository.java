@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.ReactiveQueryByExampleExecutor;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import reactor.core.publisher.Flux;
 
-public interface ItemRepository extends ReactiveCrudRepository<Item, String>, ReactiveQueryByExampleExecutor<Item>, ReactiveFluentMongoOperations {
+public interface ItemRepository extends ReactiveCrudRepository<Item, String>, ReactiveQueryByExampleExecutor<Item>{
     /* 업계에서는 NoSQL data store를 표준화하는 방법을 찾기위해 다양한 시도를 했지만, 아직 성공사례가 없다.
         이유는 모든 NoSQL 엔진이 각기 다르고, 저마다 특징과 장단점, 상충되는 부분이 존재하기 때문이다. 성급한 일반화는 고유한 특성을 잃어 실패하게 된다.
 
@@ -63,14 +63,15 @@ public interface ItemRepository extends ReactiveCrudRepository<Item, String>, Re
 
     // ~~~ repository query keywords 로 검색하자. store 별로 다르다. JPA, Cassandra.. 등등....
 
-
+    /*
     // 이제 이걸로 물가능한 나머지 쿼리는 어떻게 할까? 걍 직접 짜주면 된다.
     @Query("{ 'name' :  ?0, 'age':  ?1 }")
     Flux<Item> findItemsForCustomerMonthlyReport(String name, int age);
 
+
     @Query(sort = "{ 'age' :  -1 }")
     Flux<Item> findSortedStuffForWeeklyReport();
-
+    */
 
     // 이제 만약, 여러 필드에 대해 필터링 기능이 필요하다거나 하면 어떻게 해야할까? 2^가짓수 조합을 전부 적어야 할까? Example Query를 이용하면 된다!!
     // 우선 ReactiveQueryByExampleExecutor 를 상속해야한다.

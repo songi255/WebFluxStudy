@@ -36,11 +36,13 @@ public class InventoryService {
 
     // 평문형 연산 (fluent operation)
     // 여러 연산을 메소드 이름으로 연결하는 느낌이다.
+    // ReactiveFluentMongoOperations 를 구현한 repository 에 사용할 수 있다.
+    /*
     Flux<Item> searchByFluentExample(String name, String description){
         return itemRepository.query(Item.class)
                 //.matching(Query.query(where("TV tray").is(name).and("Smurf").is(description)))
                 //.matching(Query.query(byExample(Example.of(item, matcher)))) // Example 을 사용할 수도 있다.
                 .all();
     }
-
+    */
 }

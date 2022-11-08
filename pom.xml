@@ -70,6 +70,31 @@
             <artifactId>mongodb-driver-sync</artifactId>
         </dependency>
 
+        <!-- Spring Boot 의 개발자도구이다. 포함된 기능은 다음과 같다.
+                - App restart / reload
+                    - 개발자가 작성한 코드를 하나의 ClassLoader 로 로딩하고, third party lib 는 별도의 Loader 로 로딩한다.
+                    - App 이 재시작되면 개발자가코드 ClassLoader는 재시작되지만, third party 로드했던 Loader는 그대로 남아, 훨씬 빠르다.
+                        - 참고로 모든것을 새로 시작하는 것은 cold 방식이라고 한다.
+                        - 하지만 한계가 있기 때문에, reload 개선효과를 최대로 끌어내려면 JRebel 같은 Java Agent Solution 이 필요할 수도 있다.
+                - 환경설정정보 기본값 제공
+                - autoconfiguration 변경사항 로깅
+                - 정적 자원 제외
+                - LiveReload 지원
+         -->
+        <!--
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <scope>runtime</scope>
+            <optional>true</optional>
+        </dependency>
+        -->
+        <!-- optional 은 이 dependecy는 실제 상용운영코드에는 추가되지 않는다는 의미이다. -->
+        <!-- spring devtools는 App 시작방법을 몰래 훔쳐본다.
+                - java -jar 명령이나 클라우드 서비스 제공자가 사용하는 특별한 classLoader를 통해 App 실행 시, 이번 실행은 상용이다 라고 판단하고 기능을 비활성화한다.
+                - 하지만 IDE 에서 실행되거나, Maven의 spring-boot:run 명령으로 실행되면 해당 실행은 개발모드라고 판단하고 개발자도구의 모든 기능을 활성화한다.
+         -->
+
     </dependencies>
 
     <build>
