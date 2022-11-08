@@ -5,13 +5,20 @@ import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Service
 public class InventoryService {
     private final ItemRepository itemRepository;
-
+    private final CartRepository cartRepository;
+/*
     public InventoryService(ItemRepository itemRepository) {
         this.itemRepository = itemRepository;
+    }
+*/
+    public InventoryService(ItemRepository itemRepository, CartRepository cartRepository) {
+        this.itemRepository = itemRepository;
+        this.cartRepository = cartRepository;
     }
 
     Flux<Item> searchByExample(String name, String description, boolean useAnd){
@@ -26,6 +33,10 @@ public class InventoryService {
 
         return itemRepository.findAll(probe); // 이렇게, Example 과 API를 조합하여 호출한다.
         // 참고로, API는 findOne, findAll, findAll(Example<S> var1, Sort var2), count, exists 5개가 끝인 듯 하다... 조합해서 잘 사용하면 된다.
+    }
+
+    public Mono<Cart> addItemToCart(String cart, String id) {
+        return null; // 일단 걍 했다.
     }
 
     // Spring Data MongoDB 가 domain object 를 mongoDB document로 저장할 때 _class 라는 attribute 가 포함된다.
@@ -45,4 +56,14 @@ public class InventoryService {
                 .all();
     }
     */
+
+    public Flux<Item> getInventory() {
+        return Flux.<Item>just( new Item("id1", "name1", "desc1", 1.99),
+                new Item("id2", "name2", "desc2", 9.99));
+        // 걍 임시로 만듦
+    }
+
+    public Mono<Cart> getCart(String name){
+        return Mono.<Cart>just(new Cart("My Cart")); // 역시 걍 임시로 만듦
+    }
 }

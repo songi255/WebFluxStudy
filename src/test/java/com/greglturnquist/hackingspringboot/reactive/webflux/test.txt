@@ -1,0 +1,11 @@
+spring-boot-starter-test 의존에 의해서 다음 test library 들이 추가된다.
+    - Spring Boot Test
+    - JsonPath
+    - JUnit5
+    - AssertJ
+    - Mockito
+    - JSONassert
+    - Spring Test
+
+상호작용이 적을수록 Unit test 는 단순해진다. 그래서 domain 객체가 아마도 가장 test 하기 쉬울 것이다.
+
