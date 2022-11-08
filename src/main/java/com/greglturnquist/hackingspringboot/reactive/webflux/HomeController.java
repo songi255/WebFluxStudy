@@ -34,7 +34,8 @@ public class HomeController {
         // repository 와 연결해서 개선해보자.
         return Mono.just(
                 Rendering.view("home.html") // 이번에는 Mono<Rendering>을 반환한다. Rendering은 view/attribute를 포함하는 WebFlux container 이다.
-                .modelAttribute("items", this.itemRepository.findAll()) // 이젠 보면 알겠지? template 에서 사용할 attribute 지정이다.
+                .modelAttribute("items", this.itemRepository.findAll() // 이젠 보면 알겠지? template 에서 사용할 attribute 지정이다.
+                        .doOnNext(System.out::println))
                 .modelAttribute("cart", this.cartRepository.findById("My Cart").defaultIfEmpty(new Cart("My Cart")))
                 // MongoDB에서 장바구니를 조회해서, 없으면 새로운 Cart를 생성해 반환하는 전형적인 reactor 사용법이다.
                 .build()

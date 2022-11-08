@@ -2,11 +2,19 @@ package com.greglturnquist.hackingspringboot.reactive.webflux;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.thymeleaf.TemplateEngine;
+import reactor.blockhound.BlockHound;
 
 @SpringBootApplication
 // autoconfiguration과 component scanning을 포함하는 복합 에너테이션이다.
 public class HackingSpringBootApplication {
     public static void main(String[] args) {
+        //BlockHound.install(); // Spring 실행 전 BlockHound 호출
+        BlockHound.builder()
+                .allowBlockingCallsInside(TemplateEngine.class.getCanonicalName(), "process") // thymeleaf의 process 메서드만 허용
+                .install();
+
+
         SpringApplication.run(HackingSpringBootApplication.class, args);
         // 이 클래스를 App 시작점으로 등록하는 SpringBoot Hook 이다.
 
