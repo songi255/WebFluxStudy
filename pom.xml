@@ -189,7 +189,16 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <layers>
+                        <enabled>true</enabled>
+                    </layers>
+                </configuration>
             </plugin>
+            <!-- docker cache system 을 사용하기 위해 build 시 layer 를 사용하겠다고 설정했다. JAR 생성 command 에 변화는 없다.
+                ./mvnw clean package -DskipTests
+             -->
+
         </plugins>
     </build>
 

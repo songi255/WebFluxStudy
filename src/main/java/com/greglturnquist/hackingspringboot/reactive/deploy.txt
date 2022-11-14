@@ -1,0 +1,54 @@
+우버 Jar 배포
+    - ./mvnw package 수명주기호출
+        - compile, test 를 포함한 몇가지 단계를 거쳐 executable JAR 를 만든다.
+            - test 를 피하려면 ./mvnw package -DskipTests
+        - log 를 보면 눈여겨 볼 포인트가 있다.
+            - maven-jar-plugin 명령이 compile 된 code 를 JAR 로 만들어 target directory 안에 둔다.
+                - 하지만 이 JAR 은 그저 compile 된 code 일 뿐, executable 은 아니다.
+            - 그 다음 spring-boot-maven-plugin 명렁이 JAR + dependency + 특별한 SpringBoot code 일부를 섞어 새 JAR 을 만들어 기존 JAR을 대체한다.
+                - 이때 executable 한 JAR 이 만들어진다.
+                - java -jar target/hacking-spring-boot-ch5-reactive-0.0.1-SNAPSHOT.jar 로 실행할 수 있다.
+        - jar tvf ~~.jar 로 열어보면 다음과 같은 항목들을 확인할 수 있다.
+            - JAR 을 읽고, 그 안에 포함된 JAR 에 있는 class 를 loading 하기 위한 Spring Boot Custom Code.
+                - Java spec 에 따르면 JAR 파일 안에 다른 JAR 파일을 읽을 수 없다. 그래서 Custom Code 가 필요하다.
+            - Application Code
+            - third party lib 전체
+    이제 JDK 가 설치된 장비라면 어디서든 실행할 수 있다. 하지만 Java 가 설치되지 않은 장비에는 어떻게 배포할 수 있을까?
+
+
+Docker 배포
+    - docker 는 운영환경에서 사용할 정도로 안정적이며, test 하기에도 좋다.
+    - docker를 처음 본다면 docker 설치와 여러 예제를 볼 수 있는 https://www.docker.com/get-started 를 먼저 둘러보는 것이 좋다.
+        - docker 설치 후.. 듀토리얼이라도 한번 해보자.
+            1. 도커 데스크톱을 엽니다
+            2. 터미널에 다음 명령을 입력합니다. docker run -dp 80:80 docker/getting-started
+            3. 브라우저를 열고 http://localhost
+    - 간단한 Dockerfile을 살펴보자.
+        - FROM adoptopenjdk/openjdk11:latest
+            - 믿을만한 OpenJDK 제공자가 올려둔 JDK를 기반으로 Container 생성
+        - ARG JAR_FILE=target/*.jar
+            - pattern matching 을 사용해서 JAR 를 찾아 image build 에 사용할 argument 로 지정
+        - COPY ${JAR_FILE} app.jar
+            - app.jar 로 복사
+        - ENTRYPOINT ["java","-jar","/app.jar"]
+            - Container 안에서 java -jar /app.jar 실행한다.
+    - Spring Boot 에서 손쉬운 우버 JAR 을 지원하기 때문에, docker 화 하고 실행하는 것도 매우 간단하지만, 이걸로 충분할까?
+        - docker 는 cache system 을 가지고있다.
+            - cache system 은 Container build 에 소요되는 시간을 줄이기 위해 layering 을 사용한다.
+            - Dockerfile 의 여러 부분을 각각 하나의 layer 로 만들어, 해당계층 변경시에 그 layer 만 변경한다.
+        - 우버 JAR 을 생각해보면, 개발자코드 + Spring Boot + dependency 모두 묶여 만들어진다.
+            - 이 모든게 한 계층에 담기면 개발자코드만 바뀌어도 전부 rebuild 되어야 한다.
+        - App 을 여러 부분으로 분할해서 여러 layer 로 나눠담고, docker 의 cache system 을 사용하는 것이 더 효율적이다.
+            - stack overflow 에서 검색해보면 Dockerfile 작성법을 찾을 수 있을 것이다.
+            - 하지만, Spring Boot Maven plugin 에 내장된 Docker 지원기능을 활용하는 편이 더 낫다. pom.xml 에 layer 사용하겠다고 지정하면 된다.
+        - 어떤 계층이 만들어져 있는지 확인해 보자
+            - java -Djarmode=layertools -jar target/~~~~.jar list
+                - dependencies
+                - spring-boot-loader
+                - snapshot-dependencies
+                - application
+            - Spring Boot 가 parameter 를 인식해서 계층을 보여주는 것이라고 한다.
+            - 이제 이를 바탕으로 더 복잡한 Dockerfile 을 작성해보자.
+        - build 해보자. docker build . --tag hacking-with-spring-boot
+
+

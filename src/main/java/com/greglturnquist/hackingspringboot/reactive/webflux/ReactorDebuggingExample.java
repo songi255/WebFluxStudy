@@ -8,6 +8,7 @@ import reactor.core.scheduler.Schedulers;
 import java.util.Random;
 
 public class ReactorDebuggingExample {
+    /*
     public static void main(String[] args) {
         Hooks.onOperatorDebug(); // reactor flow 를 stack trace 할 수 있게 활성화한다.
 
@@ -22,4 +23,5 @@ public class ReactorDebuggingExample {
                 .subscribeOn(Schedulers.parallel())
                 .block();
     }
+    */
 }
