@@ -50,5 +50,19 @@ Docker 배포
             - Spring Boot 가 parameter 를 인식해서 계층을 보여주는 것이라고 한다.
             - 이제 이를 바탕으로 더 복잡한 Dockerfile 을 작성해보자.
         - build 해보자. docker build . --tag hacking-with-spring-boot
+        - 머 결론은.. cache 를 사용하고 변경점만 rebuild 한다는 것이다...
+        - 실행해보자. docker run -it -p 8080:8080 hacking-with-spring-boot:latest
+    - docker 가 낯선이들을 위해.. Spring Boot 에서는 Dockerfile 없이도 Docker Container image 를 build 할 수 있게 기능제공한다.
+        - ./mvnw spring-boot:build-image
+        - Paketo buildpack 프로젝트에서 빌드펙을 가져와서 이미지를 빌드한다.
+        - 장단이 존재한다. 자동빌드는 최신패치와 SSL 을 포함한 업계 표준 Container 기술이 빌드과정에 포함되고, 개발에 더 집중할 수 있다.
+    - 이렇게 수동 이미지 빌드도 가능하고, 프로젝트 빌드 시 이미지도 빌드되도록 설정할 수 있다.
+        - pom.xml 의 spring-boot-maven-plugin 에 build-image 라는 goal 에 execution 을 추가하면 된다.
+    - 이렇게 Container 화 된 App을 Docker Hub 같은 Container 저장소에 업로드할 수 있다.
+
+이번 절의 많은 내용은 https://spring.io/blog/2020/01/27/creating-docker-images-with-spring-boot-2-3-0-m1 를 참고했다고 한다.
+    - Spring Boot 리드 개발자인 Phil webb 의 블로그
+
+어느쪽을 택하든, 자동화는 반드시 도입하기를 추천한다. 비용과 위험을 현격하게 줄일 수 있다.
 
 

@@ -185,6 +185,7 @@
             third party lib Jar을 풀어 Class 파일을 최종 Jar에 넣는 작업을 Shading 이라고 한다.
             다른 플러그인들은 안정적이지 않으며, 라이선스에 저촉될 수 있다.
          -->
+
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
@@ -200,6 +201,8 @@
              -->
 
         </plugins>
+
+        <!-- trouble shooting.. main class 를 찾지 못하는 문제를 pluginManagement 로 감싸 해결. -->
     </build>
 
 </project>
