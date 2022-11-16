@@ -175,6 +175,12 @@
         <!-- 이제 Blockhound 가 JUnit 플랫폼의 TestExecutionListener 를 지원하므로, test method 에 사용된 blocking code 를 검출할 수 있게 되었다.
                 BlockingTest class 로 이동해서 마저 알아보자!-->
 
+        <!-- actuator -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>

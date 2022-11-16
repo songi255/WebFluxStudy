@@ -1,2 +1,24 @@
 애플리케이션 관리.
 모니터링을 돕기 위해 Actuator module 을 사용해 보자.
+
+운영팀이 어떤 걸 요구할까?
+     - 핑 날릴 수 있나요?
+     - 모니터링 지표 (metrics) 는 어떻게 볼 수 있나요?
+     - 통계는요?
+     - 서버 세부상태는요?
+    Actuator 로 빠르게 구성할 수 있다.
+
+우선 pom 에 dependency 에 추가 후 실행하면 엔드포인트 2개가 활성화되었다고 뜬다.. 보안을 위해 어떤건지 표시는 안되는 걸로 보인다.
+    - controller 에 정의된 end point 도 동일한 이유로 logging 되지 않았다.
+    - log 수준을 변경하면 확인할 수 있다.
+
+ping
+    - /actuator/health
+        - json 으로 응답온다.
+        - 세부설정을 표시하도록 설정할 수 있다.
+            - application.properties 에 추가한다.
+            - 자동설정정보를 사용해서 몽고디비 상태/버전, 디스크 상태/용량 등을 반환한다.
+            - Redis, Cassandra, RabbitMQ, RDB, email 등등.. 다른 모듈을 사용하면 해당 모듈의 healthIndicator 구현체를 찾아 등록한다.
+            - 최상위 status 는 각 모듈들의 status 를 취합해서 결정된다.
+    - /actuator/info
+        - component 버전정보도 필요하다
