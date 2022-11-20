@@ -22,3 +22,103 @@ ping
             - 최상위 status 는 각 모듈들의 status 를 취합해서 결정된다.
     - /actuator/info
         - component 버전정보도 필요하다
+        - 역시 application.properties 에 몇가지 버전정보를 입력해둠으로써 actuator 로 확인할 수 있다.
+        - maven 이 build file 에서 App version 을 읽고, plugin 으로 source code 의 version도 자동으로 읽어 통합된 정보를 보여주므로,
+          빌드되는 App과 배포되는 App의 일관성을 보장할 수 있다.
+        - 항상 말하지만, 수작업을 줄이면 위험을 대폭 줄일 수 있다.
+        - 참고로, application.properties 외에도, InfoContributor interface 를 직접 구현해서 Bean 으로 등록하면 원하는 정보를 보여줄 수 있다.
+    - 그 외의 actuator 들의 endpoint 들은 web 을 통한 기본접근이 막혀있다.
+        - 예를 들어 Java Management Extension (JMX) endpoint는 기본적으로 활성화되있으나, 보안을 위해 web 접근은 불가. App 실행 장비에서 JConsole 을 실행해야 한다.
+        - 애초에 이렇게 web 접근을 막아놓는게 정상적이다. health 와 info는 정보량이 적어 이 두가지만 예외적으로 web 공개한다..
+        - 모두 공개하고 싶다면 management.endpoints.web.exposure.include=*  하면 된다. 하지만 never.
+        - 다른것도 공개한다면 management.endpoints.web.exposure.include=auditevents,beans,caches.... 처럼 하나하나 지정하는 게 최소한의 안정성을 확보할 수 있다.
+    - /actuator/loggers
+        - 사용중인 모든 logger와 log level 정보 확인가능
+            - ROOT logger 는 Spring Boot에 의해 INFO level로 기본 추가된다.
+                - effective level 은 실제 적용된 레벨로, 다른 정책으로인한 변경이 없기 때문에 INFO 로 동일하다.
+        - 모든 package 를 원하는대로 잘게잘게 분해해서 지정가능하다. 더 구체적일수록 우선적용된다.
+        - 저장도 가능하다. curl -v -H 'Content-Type: application/json' -d '{"configuredLevel": "TRACE"}' http://localhost:8080/actuator/loggers/com.gregturnquist/
+            - log level 을 변경할 수 있는 actuator endpoint는 /actuator/loggers/{package} 다.
+                - {package} 는 loggers 항목 아래의 키값을 나타내며, 실젯값은 package 이름이다. ?????
+            - content type 은 반드시 application/json 이여야 한다.
+            - 저장에 사용되는 데이터는 반드시 {"configuredLevel" : "로그레벨값"} 으로 전송되어야 한다.
+            - 로그 레벨 지정 해제하려면 configuredLevel 을 null 으로 설정하면 된다.
+                - 이 기능은 실제 운영시스템에서 디버깅용으로 일시적 로그수준 변경으로 데이터 확인 후 되돌릴 때 유용하다.
+                - 하지만 일반적인 설정정보를 이런방식으로 지정하는 것은 좋지 않다. 클라우드기반 환경에서는 실제 호출된 인스턴스만 변경된다.
+                - 또 재부팅하거나 새로운 인스턴스가 구동될 때는 반영되지 않는다.
+    - /actuator/threaddump
+        - 현재 App 내 모든 thread 정보 확인할 수 있다.
+        - 유의할 점은 리액터기반 로직은 리액터 스레드에서 실행된다는 점이다.
+    - /actuator/heapdump
+        - 접속 시 log 대신 gzip 압축된 hprof 파일을 다운받는다. 해당 파일에 jhat ~/Downloads/headhump 해보자
+            - 7000번 포트로 웹이 열린다. 접속시 actuator의 ThreadDumpEndpoint에 의해 만들어진 headhump 파일을 확인할 수 있다.
+                - 마지막까지 보면 heap histogram, instance 개수 등을 볼 수 있다.
+            - jhat 은 JDK에 포함되있다.
+            - 더 자세한 분석이 필요하다면 VisualVM 을 설치해서 사용하는 것을 추천한다.
+                - java의 버전관리도구인 sdkman 을 사용하고 있다면..
+                    - sdk list visualvm
+                    - sdk install visualvm 2.0.6
+                    - visualvm --jdkhome $JAVA_HOME
+                    - 실행 후 File - Load 해서 jhat 보다 편하게 볼 수 있다.
+    - /actuator/httptrace
+        - HTTP 호출 trace 할 수 있다. App 을 누가 호출하는지?
+            - 가장 많이 사용되는 client 유형은? 모바일? 특정 브라우저?
+            - 어떤 언어로 된 요청이 가장 많은지? 세계화(i18n) 가 필요한가?
+            - 가장 많이 요청되는 endpoint 는?
+            - 요청이 가장 많이 발생하는 지리적 위치는?
+        - 근데 걍 이거 Google Analytics 쓰면 되지않나?
+        - SpringBoot는 HttpTraceRepository interface 제공. bean 을 선택해서 요청처리에 사용한다.
+            - InMemmoryHttpTraceRespository 는 가장 간편하게 사용할 수 있는 구현체이다.
+                - @Bean
+                - HttpTraceRepository traceRepository(){
+                    - return new InMemoryHttpTraceRepository;
+                - }
+            - 해당 bean 이 등록되면 자동으로 감지해서 endpoint 를 활성화한다. 그리고 모든 웹 요청을 추적하고 로그를 남긴다.
+                - timestamp, 보안정보, 세션id, 요청, 응답정보, 처리시간 등등 포함..
+            - Memory 기반이므로 인스턴스별 자기것만 저장하고, 재시작 시 모두 소멸된다.
+            - proof-of-concept (개념증명) 차원에서는 충분하지만, cloud 에서는 적합하지 않다. 이런 경우 직접 만들면 된다.
+                - 1. 재시작 하더라도 trace 정보 유지
+                - 2. 중앙화된 하나의 data store 에 저장
+                - mongodb 를 사용하면 좋을 듯 하다.
+                    - HttpTraceRepository 는 HttpTrace 에 정보를 담아 저장하나, HttpTrace 에는 key 로 사용할 속성이 없어 mongodb에 바로 저장할 수 없다.
+                    - 게다가 HttpTrace 는 final 이라 확장할 수 없다... decorator 를 만들자. (httpTraceWrapper)
+                    - 이제 저장용 data Repository 를 만들어보자.
+                        - 이건 stream 일 필요는 없는데, 이유는 단순히 HttpTraceRepository 가 non blocking 을 사용하지 않기 때문이다.
+                    - 요구사항이 간단하니 Spring data commons의 marker interface 를 상속해서 정의해보자. (HttpTraceWrapperRepository)
+                - 이제 HttpTraceRepository 를 구현한 객체를 @Bean 으로 등록해서 사용할 수 있따.
+                - 하지만 HttpTrace 는 역직렬화 구현이 안되있기 때문에, Spring Data Convertor 를 사용한다.
+                    - 기본적으로 Spring Data 는 다른 데이터저장소에 대해서도 mutable object(가변객체) 패러다임을 지원한다.
+                        - setter 로 속성값 지정할 수 있는 방식을 말한다.
+                        - JPA 나 JSON Serialization 을 담당하는 Jackson 에서도 사용된다.
+                    - 하지만 httpTrace는 불변타입이라서 생성자로 만들수 밖에 없다. Jackson은 이를위한 mixin 기능도 제공하지만 HttpTrace는 생성자 접근이 안된다. 그래서 Converter 를 사용한다.
+                - 이제 새 Spring Convertor 를 MongoDB에 등록해보자.
+                @Bean
+                public MappingMongoConverter mappingMongoConverter(MongoMappingContext context){
+                    // mongodb 의 dbref 값에 해석이 필요할 때 예외를 던지는 Resolver 를 사용해서 Converter 를 생성.
+                    // HttpTrace 에는 DBRef 객체가 없어서 값 해석이 발생하지 않으며 예외가 발생할 일은 없다. 단지 생성자용으로 넣어준 것이라고 한다.
+                    MappingMongoConverter mappingConverter = new MappingMongoConverter(NoOpDbRefResolver.INSTANCE, context);
+                    mappingConverter.setCustomConversions(new MongoCustomConversions(Collections.singletonList(CONVERER)));
+                    return mappingConverter;
+                }
+            - 쭉 작성된 코드가 MongoDB와 너무 강하게 연결된 듯 하다. 어떤 일을 할수 있다는 것이 그 일을 반드시 해야하는 걸 의미하지는 않는다.
+            - 이런 결합도 높은 코드를 직접 작성하는것 보다 서드파티 모니터링 도구를 조사하고 찾아 사용하는 편이 투자대비 효과가 훨씬 좋을 것이다.
+                -> 결국 걍 Google Analytics 쓰면 됬잖아...
+        - 그 밖의 엔드포인트들
+            - auditevents : audit(감사) 이벤트 표시
+            - beans : bean 표시
+            - caches : 모든 캐시정보 표시
+            - conditions : Spring boot 자동설정 기준조건 표시
+            - configprops : 모든 환경설정 정보 표시
+            - env : 현재 시스템 환경정보 표시
+            - flyway : 등록된 Flyway DB migration 도구 표시
+            - mappings : 모든 Spring WebFlux 경로 표시
+            - metrics: micrometer 를 사용해서 수직하는 metrics(지표) 표시
+        - 접근경로수정
+            - application.properties 에 추가한다.
+                - management.endpoints.web.base-path=/manage
+                    - 이러면 /actuator 대신 /manage 로 접근할 수 있다.
+                    - /로 바꾸면 곧장 접근할 수 있다.
+
+
+
+
