@@ -1,1 +1,100 @@
 오늘날 e-commerce 와 mash-up 분야에서 가장 중요한 키워드가 JSON이다.
+
+API Portal 생성
+웹 서비스 출시 후에는 사용법을 알려줘야한다. Spring REST docs 가 API 문서화 작업을 도와준다.
+    - 여러 분야에서 사용성이 입증된 Asciidoctor 문서화도구를 사용하면 세부내용도 쉽게 문서화할 수 있다.
+        - AsciiDocs 가 표준이고, Asciidoctor 는 표준을 Ruby 로 구현한 프로젝트다.
+        - 마법같은 JRuby와 커뮤니티의 노력덕에 다양한 Java Utility 가 만들어졌다.
+
+Spring REST docs 는 기본적으로 src/main/asciidoc 의 .adoc 파일을 읽어서 주요내용을 생성한다.
+
+좋은 API 문서작성에는 풍부한 예제가 필요하다.
+    - spring-restdocs-webtestclient 를 사용해서 만들고 있는 API 와 더 좋은 방식으로 연계해보자.
+        - Test 코드에서 Docs 를 생성하도록 한다.
+
+문서화 & 문서공개를 App 개발 수명주기와 별개로 진행하면 이렇게까지 하지 않아도 된다.
+하지만, 실제 내용과 문서가 맞지 않을 때의 실망감은 이루 말할 수 없다.
+
+이제 REST docs 로 자동생성한 문서를 Spring Boot 의 static web content 제공 디렉토리로 복사하면 된다.
+    - pom 에서 plugin 을 추가하자!
+
+
+
+
+/// HATEOAS ///
+API 는 진화한다. 이미 배포된 API 를 변경하려면 어떻게 해야할까? versioning? 아니면 항상 구버전 호환을 고려해야 할까?
+    - 다시말하지만, 할수있다고 반드시 해야하는건 아니다. Jean-Jacques Dubray 의 UnderStanding the Costs of Versioning 을 요약해보면,
+        - API 변경 비용은 개발자에게는 크게 와닿지 않으나,
+        - 아무런 즉각적인 비즈니스가치도 만들어주지 못하는 변경은, 단순히 비용뿐 아니라, 프로젝트붕괴 / 예산초과 등으로 이어질 수 있는 큰 위험이다.
+    - 이 논문에서 API 변경의 3가지 유형을 말한다.
+        - Knot(매듭)
+            - 단 하나의 버전. 변경 시 모든 사용자가 변경을 반영해야 하므로, 엄청난 여파를 몰고온다.
+        - point-to-point(점대점)
+            - 여러개의 version
+            - version 별 관리해야 하므로, 관리비용이 증가한다.
+        - compatible versioning(호환성 버저닝)
+            - 하나의 버전이나, 호환이 된다.
+    - 결론적으로는, compatible versioning 이 변경대응 비용이 제일 낮다.
+
+결국 호환성 API 는 어떻게 만들 수 있을까? Hyper Media 를 사용하라!
+손쉽게 HyperMedia 형식으로 Service 를 표현할 수 있게 해주는 것이 바로 Spring HATEOAS 이다.
+
+
+
+하이퍼미디어는 결국, 데이터 + 사용방법 을 제공하기 위해 hypermedia 를 사용한다.
+그래서 종종 << 데이터에 대한 설명을 여러 JSON 형식으로 제공하는 >> Profile Link 가 포함되기도 한다.
+    - 이 link 는 js 라이브러리가 자동으로 생성/수정용 input form 을 만드는 데 쓸 수도 있다.
+    - 예를들어, JSON Schema 형식으로 반환 시 Client 의 JSON editor 가 읽어서 HTML 폼을 자동으로 만들 수 있다.
+        - JSON schema profile 은 HATEOAS 에서 제공하는게 아니고, 이를 활용하는 Spring Data REST 에서 제공한다.
+            - Spring Data REST 의 미디어타입 -> 헤이티오스 hypermedia 변환기능이 포함되있어 쉽게 사용할 수 있다.
+
+Spring HATEOAS 는 ALPS(Application Level Profile Semantics : http://alps.io) 도 지원한다.
+    - ALPS 를 사용하는 web method 작성 시 자신만의 profile 을 만들어 사용할 수도 있다!
+
+
+하이퍼미디어의 목적이 오직 HTML form 자동 생성만은 아니다. con-nascence (동변관계) 라는 더 깊고 근본적인 개념이 작동한다.
+    - Meilir-Page Johes 가 창안한 SW 품질지표로써, System 복잡도 설명에 사용된다.
+    - 2개의 Component 중 하나의 변경발생 시, 나머지 하나도 수정해야 시스템 정합성이 유지된다면, 동변관계이다.
+        - 만약 한팀에서 front 와 back 을 모두 한다면 사실상 이미 강결합 되어있을 가능성이 크다.
+            - 이 경우, 하나가 변하더라도, 다른쪽도 변경하면 되서, hypermedia 의 장점을 느낄 수 없다.
+        - 하지만, 여러 팀이 사용하는 API 를 만들었다면 다르다.
+            - Client 가 주문취소 버튼 표시여부를, 주문 상태에 따라 결정하도록 했다면 Back 과 강결합되있는것이다.
+                - Back 이 새 상태를 추가할수도 있다. Client 가 Back 에서 받은 Data 를 기반으로 Logic 작성했다면, 새 상태 떄문에 로직이 꺠질 수도 있따.
+            - 주문 처리과정은 같으나 국제화를 했다면? 대부분 Client 는 심대한 영향을 받을것이다.
+        - 그럼 어떻게? Client 가 직접적으로 Domain 지식에 의존하는 대신, Protocol 에만 의존하게 만들면 잠재적인 문제를 피해갈 수 있다.
+            - 예를 들면, Client 가 주문지식을 직접 사용하지 말고, 단순히 Link 를 읽고 따라가게만 만드는 것이다. (?)
+    - 바로 이 점이 REST 가 지향하는 바 라고 한다.
+        - 사람들이 뭐라하든, REST 는 URL 을 깔끔하게 작성하는 방법이 아니다.
+        - JSON 으로 나타내는 방법도 아니다.
+        - POST + JSON 으로 데이터를 추가하는것도 아니다.
+        - 그럼 뭔데? 상거래, 정부 등등.. 우리 삶을 연결하는 수많은 분야의 중심에 Web 이 자리할 수 있게 해줬던 것과 똑같은 전술을 사용하는 것을 말한다!
+            - 쉽게말해, Web site 의 변경이, web browser 의 update 를 유발하지 않는다는 순수한 사실은, server 변경이 client 에 영향미치지 않게 만드는게 가능하다는 증거가 된다.
+
+Roy Fielding 박사가 논문에서 제안한 개념이 적용된 API (REST 인듯) 는 하위호환성을 가진다. 즉, 유지관리 총 비용을 절감할 수 있다.
+
+상세 설명과 예제는 Oliver Drotbohm 의 진부함을 넘어선 REST 를 참조했다. "https://bit/ly/rest-beyond-theobvious-deck"
+동일자료의 영상도 추천한다. "https://bit/ly/rest-beyond-the-obvidous-video"
+
+
+/// API 에 행동유도성 추가 ///
+hypertext 는 여러가지로 정의되지만, 여기서는 affordance(행동유도) 로 이어지도록, 해당 정보 + 제어 를 동시에 표현하는 것을 말한다.
+사용자의 선택권획득 / 행동선택은 정보를 바탕으로 하는 행동유도를 통해 이뤄진다 - Roy Fielding 의 발표 중..
+
+참고로 UX 분야에서 affordance 라는 용어로 사용된다. (확인버튼에 색을 넣어 행동 유도하거나, 조건 불만족시 다음버튼 비활성화 등..)
+
+지금까지 살펴본 JSON 은 기본 or HAL 추가 정도였다. 하지만 문제가 있다.
+    - 동일 URL 가리키는 GET, PUT 을 함꼐 담으면 HAL 은 1개의 link 만 생성한다.
+        - 사용자는 2가지 선택지가 존재했다는 사실을 알 수 없다.
+    - PUT 에 어떤 정보를 제출해야 하는 지 알 수 없다.
+    - 여기서 affordance 가 추가된 HATEOAS API 를 써보자.
+        - 하나의 Item 을 보여줄 때, Item 수정 행동유도성을 추가해주는 것이 전형적인 사례이다.
+            - HATEOAS 는 관련 method 를 연결할 수 있는 수단을 제공한다.
+            - Item 사례에서는 GET 연산에 대한 link 가 PUT 연산으로 이어질 수 있다.
+    - HAL-FORMS 같은 형식은 추가정보 렌더링할 수 있는 연결정보도 보여줄 수 있다.
+        - 행동 유도성 추가할 수 있는 어떤 media type 이라도 이런 meta data 를 제공할 수 있다는 장점이 있다.
+
+
+하이퍼미디어와 행동유도성으로 할 수 있는 일은 지금까지 본 것보다 훨씬 더 많다고 한다.
+잘 확용하면 풍부하고 생동감 넘치는 API를 만드는 데 큰 도움이 된다.
+    -> 타사 API 들 많이 참조할 필요가 있을 듯.
+
