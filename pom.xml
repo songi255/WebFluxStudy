@@ -226,6 +226,18 @@
             <artifactId>spring-boot-starter-amqp</artifactId>
         </dependency>
 
+        <!-- rsocket server 용
+            이를 통해, 다음 기능들이 추가된다.
+                - Rsocket Core / Transport Netty
+                - Reactor Netty : netty 는 reactive message 관리자 역할도 충분히 가능하다.
+                - Spring Messaging : 직렬화, 라우팅. Jackson과 함께 사용하는 사례는 무수히 많으며 현장에서 충분히 검증되었다.
+                - Jackson
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-rsocket</artifactId>
+        </dependency>
+
 
     </dependencies>
 
