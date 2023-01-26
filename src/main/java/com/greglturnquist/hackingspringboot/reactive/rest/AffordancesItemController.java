@@ -1,4 +1,4 @@
-package rest;
+package com.greglturnquist.hackingspringboot.reactive.rest;
 
 import com.greglturnquist.hackingspringboot.reactive.webflux.Item;
 import com.greglturnquist.hackingspringboot.reactive.webflux.ItemRepository;

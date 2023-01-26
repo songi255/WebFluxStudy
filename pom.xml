@@ -202,7 +202,45 @@
             </exclusions>
         </dependency>
 
+        <!-- RabbitMQ test Scope 의존관계 추가
+            아래는 docker 관리 핵심 라이브러리 + rabbitmq 활성화 모듈이 포함되어있다.
+             가벼운 alpine linux 기반으로 만들어진 rabbitmq:3.7-management-alpine 이미지를 docker hub 에서 가져와 test 하게 된다.
+                - alpine linex 는 경량 + 보안중점 이다.
+        -->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>rabbitmq</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- testcontainer 는 현재 JUnit4 로 만들어져서, 5를 사용하는 Spring 2.3+ 와 사용하기 위해 아래 모듈이 필요하다. -->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Spring AMQP -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
+        </dependency>
+
+
     </dependencies>
+
+    <!-- test container 를 위한 BOM (Bill of Materials) file 가져오기 -->
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers-bom</artifactId>
+                <version>1.17.6</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <!-- Maven plugin. Java build 도구이다.

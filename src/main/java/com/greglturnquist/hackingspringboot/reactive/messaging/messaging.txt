@@ -1,0 +1,48 @@
+Component 간 결합도를 낮추고 Architecture 고도화를 위해 비동기 messaging 을 사용해보자.
+    - 동일 App 내, 혹은 Network 를 통해 연결된 Microservice 의 Component 간 연결의 좋은 수단이 될 수 있다.
+
+우선 "Java 복잡도감소" 가 Spring portfolio 의 핵심이라는 것을 이해하고 가자.
+    - Spring 의 설계목표는 무엇보다도 App 제작방법을 단순화하는 것이다.
+    - template pattern 은 이를 위한 가장 강력한 수단 중 하나이다.
+        - 본질적으로 template 이란 특정 API 의 모든 복잡성을, 가자 단순한 연산으로 축약하는 것을 의미한다.
+
+솔루션 선택
+    - JMS (Java Messaging Service)
+        - Java 표준 메시징 API
+        - Spring 은 JmsTemplate 와 DefaultMessageListenerContainer 제공
+    - Apache Kafka
+        - 빠른속도로 대세가 되어가는 Broker
+        - Spring for Apache Kafka 에서 KafkaTemplate와 KafkaMessageListenerContainer 제공
+    - RabbitMQ
+        - 높은처리량, 강한 회복력이 특징인 Broker
+        - Spring AMQP 는 AmqpTemplateSimple 과 MessageListenerContainer 제공
+    - Redis
+        - 빠른 속도가 무기인 Broker
+        - 가장 널리 사용됨
+        - Spring Data Redis 는 RedisMessageListenerContainer 제공
+    - 그외
+        - AMQP (Advanced Message Queueing Protocol)
+        - GemFire
+        - Apache Geode
+    각 솔루션들이 어떤 시나리오에 맞는지는 경험을 많이 해봐야 알 듯 하다.
+
+여기서는 RabbitMQ 를 기준으로 진행할 것이다.
+    - 설치, 설정, 실행은 굉장히 복잡해서, 생략한다.
+    - 그 대신, Docker 의 Test Container 를 활용한다. (https://tsetcontainers.org/)
+        - Docker 에서 실행될수만 있다면, 어떤 DB / Message Broker / third party System 도 test 용으로 쉽게 쓸 수 있다.
+        - Test 종료시, 남은 자원도 싹 정리되므로 아주 깔끔하다.
+        - 사용을 위해서는 docker 가 필요하다. docker 는 디스크 공간을 많이 차지하기 때문에 정기적으로 system prune 명령으로 미사용 container 를 정리해줘야 한다.
+    - Test Container 사용을 위한 BOM (Bill Of Materials) 파일을 pom.xml 으로 가져오자.
+
+메시징은 web 의 전유물이 아니다. 그래서 어떤 방식으로든 message 를 받게 해도 된다. web 도 가능하다는 걸 알면 된다.
+
+
+대충 이렇게 testContainer 를 통해 사용해봤는데, 실제로는 브로커 설치와 설정에 긴 시간이 든다.
+VMWare 의 Tanzu App service 같은 Cloud Solution 을 선정하면 아주 간단하게 messaging 기반 App 을 상용배포할 수 있다.
+
+
+여하튼 어떤 솔루션을 사용하든 핵심은 동일하다.
+- 블로킹 API 는 별도 스레드에서
+- 1개의 메시지 발행
+- 여러 consumer 가 소비
+- Spring Portfolio 에 포함된 다양한 Template 활용

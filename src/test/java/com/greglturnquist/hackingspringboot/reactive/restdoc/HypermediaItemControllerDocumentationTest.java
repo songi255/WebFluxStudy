@@ -10,7 +10,7 @@ import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
-import rest.HypermediaItemController;
+import com.greglturnquist.hackingspringboot.reactive.rest.HypermediaItemController;
 
 import static org.springframework.restdocs.webtestclient.WebTestClientRestDocumentation.document;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
