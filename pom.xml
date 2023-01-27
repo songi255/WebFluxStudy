@@ -238,6 +238,35 @@
             <artifactId>spring-boot-starter-rsocket</artifactId>
         </dependency>
 
+        <!-- spring security -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- oauth 를 사용하기 위해서는, spring-boot-starter-security 대신에 아래것들을 추가해야 한다. -->
+        <!-- controller 에서 security 설정 annotation 과 type 을 사용하기 위해 필요 -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-config</artifactId>
+        </dependency>
+        <!-- OAuth client 로, OAuth Provider 와 통신에 필요 -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-oauth2-client</artifactId>
+        </dependency>
+        <!-- JOSE(Javascript Onject Signing and Encryption) 사용 시 필요 -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-oauth2-jose</artifactId>
+        </dependency>
+
 
     </dependencies>
 

@@ -1,6 +1,15 @@
-# yaml file can't contain Korean. if to do, use UTF-8 encoding everywhere
-# you should write mongoDB settings Since Boot 2.7.5... match with version used in project
+# Boot 2.7.5 이후로 mongoDB 설정을 project version 에 맞게 적어줘야한다.
 spring:
   mongodb:
     embedded:
       version: 3.4.11
+
+# oauth 용 client 인증정보 추가
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: id
+            client-secret: password

@@ -1,0 +1,27 @@
+Spring 의 꽃, 보안이다. 여기서는 다음을 배운다.
+    - 다양한 사용자정보 저장소를 사용하는 Spring security 설정
+    - HTTP endpoint 에 route 기반 보안설정 적용
+    - reactive endpoint 에 method 수준 보안적용
+    - 권한검사를 위한 spring security context 연동
+
+우선 pom 에 security 를 적용한다.
+    - 그 결과 자동설정으로 웹사이트 전체에 login 으로 보안이 걸렸다.
+    - password 도 app 실행마다 무작위로 설정되고 console 에 표시된다.
+    - 그러나 실제 운영에 배포하기에는 턱없이 부족하다. 여러가지 정책을 추가해야 한다.
+
+Spring security 는 다음과 같은 다중 계층 방식으로 광범위한 보안을 적용한다.
+    - 여러가지 filter 생성, 적절한 순서로 등록
+    - webpage 에 다양한 directive (지시어) 추가
+        - 바람직하지 않은 정보가 browser cache 에 유입되는 것 방지
+        - click jacking, session fixation, XSS projections 등 보안위험 방어
+        - 서버 응답에 적절한 보안헤더 추가
+        - Cross Site Request Forgery (CSRF) 방지 활성화
+    요컨에 보안위협에 대한 최신 방어책을 포함하고 있다.
+
+
+
+Method 수준 보안
+위에서 Filter 를 이용해서 기본적인 보안을 적용했는데, 많이 부족하다.
+    - Controller 변경 시 security 정책도 같이 변경해야 한다.
+    - Controller 추가될 수록 SecurityWebFilterChain 에 추가해야 할 규칙도 금세 늘어난다.
+여튼 이를 위해 Method 수준 보안방식이 등장했다. 메소드에 직접 @ 를 명시하는 것이다.

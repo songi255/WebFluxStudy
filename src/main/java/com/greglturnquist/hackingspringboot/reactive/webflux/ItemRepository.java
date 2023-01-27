@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.repository.query.ReactiveQueryByExampleExecutor;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 public interface ItemRepository extends ReactiveCrudRepository<Item, String>, ReactiveQueryByExampleExecutor<Item>{
     /* 업계에서는 NoSQL data store를 표준화하는 방법을 찾기위해 다양한 시도를 했지만, 아직 성공사례가 없다.
@@ -82,6 +83,7 @@ public interface ItemRepository extends ReactiveCrudRepository<Item, String>, Re
     // 참고로 마이그레이션은 쉽지 않은 작업이기 때문에, 사전에 어떤 data store 를 사용할 지 면밀히 분석해서 결정해야 한다. 도메인 객체 정의에도 큰 영향을 미치므로..
 
 
-
+    // 임시
+    Mono<Item> findByName(String name);
 
 }

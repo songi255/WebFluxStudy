@@ -1,0 +1,46 @@
+SNS 가 인기를 얻고 새로운 보안이슈가 떠오르게 되었다. 써드파티앱들이 우후죽순 생겨나게 된 것이다.
+써드파티앱에서의 인증이 연동도 안될뿐더러, 여기서 털리면 본계정도 털리게되었다.
+
+그래서 OAuth 개념이 탄생했다. secure delegated access (안전한 위임접속) 을 보장하는 공개 protocol 이다.
+서드파티에서 인증하는 대신, SNS 의 login 페이지를 띄워주며, 전달되는 보안토큰을 통해 SNS 의 데이터에 접근할 수 있도록 한다.
+
+token 에는 expiration (만기), refresh (갱신) 등의 핵심기능이 포함되어있따.
+    - Oauth 스펙은 몇차례 개정되었다. 처음에는 간단했는데, 여러 선택사항들이 추가되었다.
+    - 하지만 이런 유연성에도 부작용은 있었다. 사용하는 곳 들에서 구현방식이 조금씩 달랐던 것이다.
+    - 현재 업계에서 받아들여지고 있는 표준은 OpenID Connect 1.0(OIDC) 이다. 실제로 사용하는 사이트는 대부분 이걸 준수한다.
+
+우선 의존관계를 추가하자.
+
+이후 OAuth Provider 인 Google 에 새 App 등록을 해보자.
+    - https://developers.google.com//identity/protocols/OpenIDConnect
+    - Credentials page
+    - 아직 Google Cloud 에서 project 를 만든 적이 없다면
+        - https://cloud.google.com/resource-manager/docs/creating-managing-projects?hl=ko
+        - 리소스 관리 페이지로 이동
+        - 프로젝트 만들고, 만든 프로젝트 선택
+    - 사용자 인증 정보 만들기 - OAuth 클라이언트 ID
+    - 동의화면구성
+    - User Type 에서 외부 선택, 만들기
+    - 앱 정보 등록
+    - 저장 후 계속
+    - test 사용자는 이메일 추가
+    - 좌측메뉴의 사용자 인증정보 - 사용자 인증정보만들기 - OAuth 클라이언트 ID
+    - 정보들 입력
+    - 승인된 리디렉션 URI 에 http://localhost:8080/login/oauth2/code/google
+    - 생성된 Id, password 는 나중에도 확인가능
+
+App 에 적용해보자. boot 는 properties 말고 yml 도 지원한다.
+    - 동일 환경설정 항목수준 안에 여러개의 하위요소가 있을 때는 yml 이 더 편리하다. oauth 도 yml 로 하면 더 편하다.
+
+Spring Security 에 OAuth 사용에 필요한 대부분 정보가 이미 설정되어있어, id, secret 만 입력하면 된다.
+Google, Github, Meta, Okta 등 client 기능이 미리 만들어져 제공되고 있다. 지원 프로바이더는 CommonOAuth2Provider class 를 참고한다.
+
+OAuth 를 사용하는 주된 이유는 사용자정보관리를 위임할 수 있기 때문이다.
+보안문제 발생 빈도를 생각해보면, 직접관리하기보다 이미 안전하게 관리하고 있는 곳에 위임하는 것도 꽤 현명한 생각이다.
+
+사용자 관리를 외부에 위임할 때 고려사항은, 여러가지 권한/역할 선언 대신 SCOPE 를 다뤄야 한다는 점이다.
+    - SCOPE 도 SCOPE_ 접두사가 붙은 권한의 일종이라 생각하면 된다.
+    - Provider 가 제공하는 SCOPE 외에 Custom SCOPE 가 필요한지 검토해보는 것이 중요하다.
+        - Google 이나 Meta 는 자신들의 API 를 사용하는데 중점을 두고 있어서, Custom SCOPE 나 GROUP 을 만들 수 없다.
+
+이로써 모든 내용이 끝났다. 더 알고 싶다면 Josh Long 의 reactive spring 을 참고해도 좋다고 한다.

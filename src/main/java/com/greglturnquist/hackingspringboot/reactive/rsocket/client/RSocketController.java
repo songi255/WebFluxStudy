@@ -14,20 +14,21 @@ import reactor.core.publisher.Mono;
 import java.net.URI;
 import java.time.Duration;
 
+import static io.rsocket.metadata.WellKnownMimeType.MESSAGE_RSOCKET_ROUTING;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.*;
 
 @RestController // HTML 을 랜더링하지 않는다.
 public class RSocketController {
     // 오류 때문에 임시로 null 했다.
-    private final Mono<RSocketRequester> requester = null; // Mono를 쓰므로, Rsocket 에 연결된 코드는 새 client 가 구독할 떄마다 호출된다.
+    private final Mono<RSocketRequester> requester; // Mono를 쓰므로, Rsocket 에 연결된 코드는 새 client 가 구독할 떄마다 호출된다.
 
     // spring boot 는 RSocketRequesterAutoConfiguration 정책 안에서 자동설정으로 RSocketRequester.Builder bean 을 만들어준다.
     // Jackson 을 포함해서 여러가지 encoder / decoder 를 사용할 수 있다.
 
     // 얘들도 방식이 바뀐 것 같다. 실제 사용에서 따로 사용법을 찾아보도록 하자.
 
-    /*
+
     public RSocketController(RSocketRequester.Builder builder){
         this.requester = builder
                 .dataMimeType(APPLICATION_JSON) // data의 mediatype 지정. Spring 상수를 사용했다.
@@ -39,7 +40,7 @@ public class RSocketController {
                 // 요청 Mono 를 hot source 로 저장. 가장 최근 신호는 캐시될 수 있으며, 구독자는 사본을 가지고 있을수도 있다.
                 // 다수의 client 가 동일한 하나의 data 를 요구할 떄 효율성을 높일 수 있다.
                 .cache();
-    }*/
+    }
 
     /* RSocketRequester 는 R Socket 에 무언가를 보낼 때 사용하는 얇은 포장재와 같다.
         - Rsocket 에 messaging 패러다임은 포함되지 않았다. Requester 를 사용하면 Spring 과 연동된다.
